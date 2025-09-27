@@ -1,0 +1,45 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+
+ZIP_BASELINES = {
+    "85281": {"crime": 55, "flood": 20, "fire": 70},  # Tempe demo ZIP
+    "85004": {"crime": 65, "flood": 15, "fire": 60},  # Phoenix downtown
+}
+
+def score_to_level(s):
+    return "Low" if s < 34 else "Medium" if s < 67 else "High"
+
+def tips_for(profile):
+    tips = []
+    if profile["fire"]["level"] in ["Medium","High"]:
+        tips += ["Install & test smoke alarms", "Create a 2-minute evacuation plan", "Keep fire extinguisher accessible"]
+    if profile["flood"]["level"] in ["Medium","High"]:
+        tips += ["Store docs off the floor", "Know local flood zones/evac routes", "Prepare a go-bag with essentials"]
+    if profile["crime"]["level"] in ["Medium","High"]:
+        tips += ["Use 2FA on important accounts", "Outdoor lights / camera signage", "Don’t reuse passwords"]
+    return tips[:5] or ["Stay prepared with a basic emergency kit"]
+
+@app.get("/api/risks")
+def risks():
+    zip_code = (request.args.get("zip") or "").strip()
+    if not zip_code.isdigit() or len(zip_code) != 5:
+        return jsonify({"error":"Provide a 5-digit zip"}), 400
+
+    baseline = ZIP_BASELINES.get(zip_code, {"crime": 40, "flood": 25, "fire": 35})
+    crime = baseline["crime"]
+    flood = baseline["flood"]
+    fire  = baseline["fire"]
+
+    profile = {
+        "zip": zip_code,
+        "crime": {"score": crime, "level": score_to_level(crime)},
+        "flood": {"score": flood, "level": score_to_level(flood)},
+        "fire":  {"score": fire,  "level": score_to_level(fire)},
+    }
+    return jsonify({**profile, "tips": tips_for(profile)})
+
+if __name__ == "__main__":
+    app.run(port=5001, debug=True)

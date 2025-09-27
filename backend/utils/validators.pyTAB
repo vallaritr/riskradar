@@ -1,0 +1,3 @@
+def is_zip(s: str) -> bool:
+    return isinstance(s, str) and s.isdigit() and len(s) == 5
+

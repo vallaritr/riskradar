@@ -1,0 +1,9 @@
+{
+  "85281": { "crime": 55, "flood": 20, "fire": 70 },
+  "85004": { "crime": 65, "flood": 15, "fire": 60 },
+  "94110": { "crime": 40, "flood": 30, "fire": 25 },
+  "02139": { "crime": 35, "flood": 40, "fire": 30 },
+  "00000": { "crime": 40, "flood": 25, "fire": 35 }
+}
+
+
